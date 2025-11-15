@@ -55,6 +55,16 @@ importers:
         specifier: 8.46.4
         version: 8.46.4(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
 
+  apps/backend:
+    dependencies:
+      hono:
+        specifier: ^4.10.6
+        version: 4.10.6
+    devDependencies:
+      wrangler:
+        specifier: ^4.4.0
+        version: 4.47.0
+
   apps/frontend:
     dependencies:
       '@cloudflare/vite-plugin':
@@ -2262,6 +2272,10 @@ packages:
 
   hermes-parser@0.25.1:
     resolution: {integrity: sha512-6pEjquH3rqaI6cYAXYPcz9MS4rY6R4ngRgrgfDshRptUZIc3lw0MCIJIGDj9++mfySOuPTHB4nrSW99BCvOPIA==}
+
+  hono@4.10.6:
+    resolution: {integrity: sha512-BIdolzGpDO9MQ4nu3AUuDwHZZ+KViNm+EZ75Ae55eMXMqLVhDFqEMXxtUe9Qh8hjL+pIna/frs2j6Y2yD5Ua/g==}
+    engines: {node: '>=16.9.0'}
 
   html-encoding-sniffer@4.0.0:
     resolution: {integrity: sha512-Y22oTqIU4uuPgEemfz7NDJz6OeKf12Lsu+QC+s3BVpda64lTiMYCyGwg5ki4vFxkMwQdeZDl2adZoqUgdFuTgQ==}
@@ -5546,6 +5560,8 @@ snapshots:
   hermes-parser@0.25.1:
     dependencies:
       hermes-estree: 0.25.1
+
+  hono@4.10.6: {}
 
   html-encoding-sniffer@4.0.0:
     dependencies:

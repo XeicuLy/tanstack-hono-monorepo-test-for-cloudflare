@@ -1,6 +1,8 @@
 {
   "name": "tanstack-hono-monorepo-test-for-cloudflare",
   "version": "1.0.0",
+  "private": true,
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

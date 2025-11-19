@@ -5,12 +5,18 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy --minify",
-    "cf-typegen": "wrangler types --env-interface CloudflareBindings"
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings",
+    "typecheck": "pnpm run cf-typegen && tsc --noEmit",
+    "generate-types": "pnpm run dev & sleep 5 && openapi-ts && pkill -f 'wrangler dev'"
   },
   "dependencies": {
-    "hono": "^4.10.6"
+    "@hono/swagger-ui": "0.5.2",
+    "@hono/zod-openapi": "1.1.4",
+    "hono": "4.10.6",
+    "http-status": "2.1.0"
   },
   "devDependencies": {
-    "wrangler": "^4.4.0"
+    "@hey-api/openapi-ts": "0.87.5",
+    "wrangler": "4.47.0"
   }
 }

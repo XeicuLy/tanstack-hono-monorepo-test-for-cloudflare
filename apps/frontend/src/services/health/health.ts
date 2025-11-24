@@ -9,6 +9,11 @@ const getHealthApi = createServerFn().handler(async () => {
     const response = import.meta.env.DEV
       ? await fetch('http://localhost:8787/api/health')
       : await env.BACKEND_API_ENDPOINT.fetch('/api/health');
+
+    if (!response.ok) {
+      throw new Error(`Health API responded with ${response.status} ${response.statusText}`);
+    }
+
     return await response.json<GetApiHealthResponse>();
   } catch (error) {
     consola.error('Error fetching health data:', error);

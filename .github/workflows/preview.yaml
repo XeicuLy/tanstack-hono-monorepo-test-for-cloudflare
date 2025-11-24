@@ -29,29 +29,15 @@ jobs:
           pnpm-version: ${{ env.PNPM_VERSION }}
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Build
+      - name: Build Frontend
+        working-directory: apps/frontend
         run: pnpm build
-
-      # ビルド成果物の確認（デバッグ用）
-      - name: Check build outputs
-        run: |
-          echo "=== Backend build output ==="
-          ls -la apps/backend/dist/ || echo "Backend dist not found"
-          echo ""
-          echo "=== Frontend build output ==="
-          ls -la apps/frontend/dist/server/ || echo "Frontend dist/server not found"
 
       - name: Deploy Backend Preview
         id: deploy-backend
         working-directory: apps/backend
         run: |
           echo "🚀 Deploying backend..."
-
-          # ビルド済みか確認
-          if [ ! -d "dist" ]; then
-            echo "❌ Backend build output not found. Running build..."
-            pnpm build
-          fi
 
           OUTPUT=$(pnpm wrangler versions upload 2>&1) || {
             EXIT_CODE=$?
@@ -83,12 +69,6 @@ jobs:
         working-directory: apps/frontend
         run: |
           echo "🚀 Deploying frontend..."
-
-          # ビルド済みか確認
-          if [ ! -d "dist/server" ]; then
-            echo "❌ Frontend build output not found. Running build..."
-            pnpm build
-          fi
 
           OUTPUT=$(pnpm wrangler versions upload 2>&1) || {
             EXIT_CODE=$?

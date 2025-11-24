@@ -1,6 +1,6 @@
 import { swaggerUI } from '@hono/swagger-ui';
 import { OpenAPIHono } from '@hono/zod-openapi';
-import { consola } from 'consola';
+import consola from 'consola';
 import { corsMiddleware } from './middleware/cors';
 import { healthHandler } from './routes/health';
 

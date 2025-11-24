@@ -1,5 +1,6 @@
-import { createRoute, type OpenAPIHono } from '@hono/zod-openapi';
+import { createRoute } from '@hono/zod-openapi';
 import status from 'http-status';
+import type { OpenAPIHonoApp } from '..';
 import { healthResponseSuccessSchema } from '../schema/health';
 
 const healthRoute = createRoute({
@@ -16,7 +17,7 @@ const healthRoute = createRoute({
   },
 });
 
-export const healthHandler = (app: OpenAPIHono<{ Bindings: CloudflareBindings }>) => {
+export const healthHandler = (app: OpenAPIHonoApp) => {
   app.openapi(healthRoute, (c) => {
     return c.json({ timestamp: new Date().toISOString() });
   });

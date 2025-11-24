@@ -20,4 +20,6 @@ app.get('/swagger-ui', swaggerUI({ url: '/api/openapi.yaml' }));
 consola.success('⚡️ Hono for Cloudflare Workers is running!');
 consola.info('📄 Swagger UI: http://localhost:8787/api/swagger-ui');
 
+export type OpenAPIHonoApp = typeof app;
+
 export default app;

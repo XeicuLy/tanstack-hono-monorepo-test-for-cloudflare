@@ -32,30 +32,47 @@ jobs:
       - name: Build
         run: pnpm build
 
+      # ビルド成果物の確認（デバッグ用）
+      - name: Check build outputs
+        run: |
+          echo "=== Backend build output ==="
+          ls -la apps/backend/dist/ || echo "Backend dist not found"
+          echo ""
+          echo "=== Frontend build output ==="
+          ls -la apps/frontend/dist/server/ || echo "Frontend dist/server not found"
+
       - name: Deploy Backend Preview
         id: deploy-backend
         working-directory: apps/backend
         run: |
           echo "🚀 Deploying backend..."
+
+          # ビルド済みか確認
+          if [ ! -d "dist" ]; then
+            echo "❌ Backend build output not found. Running build..."
+            pnpm build
+          fi
+
           OUTPUT=$(pnpm wrangler versions upload 2>&1) || {
             EXIT_CODE=$?
             echo "❌ Backend deployment failed with exit code $EXIT_CODE"
-            echo "Output:"
+            echo "=== Full wrangler output ==="
             echo "$OUTPUT"
             exit $EXIT_CODE
           }
+
           echo "$OUTPUT"
 
           BACKEND_PREVIEW_URL=$(echo "$OUTPUT" | grep "Version Preview URL:" | sed 's/.*Version Preview URL: //' | tr -d '[:space:]')
 
           if [ -z "$BACKEND_PREVIEW_URL" ]; then
             echo "❌ Backend Version Preview URL not found in wrangler output"
-            echo "Full output was:"
+            echo "=== Full output was ==="
             echo "$OUTPUT"
             exit 1
           fi
 
-          echo "✅ Backend deployed successfully"
+          echo "✅ Backend deployed to: $BACKEND_PREVIEW_URL"
           echo "BACKEND_PREVIEW_URL=$BACKEND_PREVIEW_URL" >> $GITHUB_ENV
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -66,25 +83,33 @@ jobs:
         working-directory: apps/frontend
         run: |
           echo "🚀 Deploying frontend..."
+
+          # ビルド済みか確認
+          if [ ! -d "dist/server" ]; then
+            echo "❌ Frontend build output not found. Running build..."
+            pnpm build
+          fi
+
           OUTPUT=$(pnpm wrangler versions upload 2>&1) || {
             EXIT_CODE=$?
             echo "❌ Frontend deployment failed with exit code $EXIT_CODE"
-            echo "Output:"
+            echo "=== Full wrangler output ==="
             echo "$OUTPUT"
             exit $EXIT_CODE
           }
+
           echo "$OUTPUT"
 
           FRONTEND_PREVIEW_URL=$(echo "$OUTPUT" | grep "Version Preview URL:" | sed 's/.*Version Preview URL: //' | tr -d '[:space:]')
 
           if [ -z "$FRONTEND_PREVIEW_URL" ]; then
             echo "❌ Frontend Version Preview URL not found in wrangler output"
-            echo "Full output was:"
+            echo "=== Full output was ==="
             echo "$OUTPUT"
             exit 1
           fi
 
-          echo "✅ Frontend deployed successfully"
+          echo "✅ Frontend deployed to: $FRONTEND_PREVIEW_URL"
           echo "FRONTEND_PREVIEW_URL=$FRONTEND_PREVIEW_URL" >> $GITHUB_ENV
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -107,7 +132,6 @@ jobs:
               issue_number: context.issue.number
             });
 
-            // GitHub Actionsボットの既存プレビューコメントを削除
             for (const comment of comments) {
               const isGithubActionsBot = comment.user?.login === 'github-actions[bot]';
               const isPreviewComment = comment.body?.includes('🚀 プレビューデプロイが完了しました！');
@@ -129,10 +153,13 @@ jobs:
             const backendUrl = '${{ env.BACKEND_PREVIEW_URL }}';
             const frontendUrl = '${{ env.FRONTEND_PREVIEW_URL }}';
             const comment = `🚀 プレビューデプロイが完了しました！
+
             **Backend API:** ${backendUrl}
             **Frontend:** ${frontendUrl}
+
             ---
-            *Commit: ${{ github.event.pull_request.head.sha }}*`;
+            *Commit: \`${context.payload.pull_request.head.sha.substring(0, 7)}\`*`;
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,

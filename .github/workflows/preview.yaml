@@ -38,6 +38,10 @@ jobs:
           OUTPUT=$(pnpm wrangler versions upload 2>&1)
           echo "$OUTPUT"
           PREVIEW_URL=$(echo "$OUTPUT" | grep "Version Preview URL:" | sed 's/Version Preview URL: //')
+          if [ -z "$PREVIEW_URL" ]; then
+            echo "Version Preview URL not found in wrangler output" >&2
+            exit 1
+          fi
           echo "PREVIEW_URL=$PREVIEW_URL" >> $GITHUB_ENV
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

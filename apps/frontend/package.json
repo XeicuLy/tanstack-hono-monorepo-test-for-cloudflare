@@ -10,6 +10,7 @@
     "deploy": "pnpm run build && wrangler deploy",
     "preview": "pnpm run build && vite preview",
     "cf-typegen": "wrangler types",
+    "generate-types": "pnpm run cf-typegen",
     "typecheck": "pnpm run cf-typegen && tsc --noEmit"
   },
   "dependencies": {

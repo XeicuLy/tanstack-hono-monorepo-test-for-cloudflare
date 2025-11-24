@@ -7,7 +7,7 @@
     "deploy": "wrangler deploy --minify",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
     "typecheck": "pnpm run cf-typegen && tsc --noEmit",
-    "generate-types": "pnpm run dev & sleep 5 && openapi-ts && pkill -f 'wrangler dev'"
+    "generate-types": "openapi-ts && pnpm run cf-typegen"
   },
   "dependencies": {
     "@hono/swagger-ui": "0.5.2",

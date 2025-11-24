@@ -20,6 +20,7 @@
     "typecheck": "pnpm --recursive run typecheck",
     "lint": "pnpm eslint && pnpm biome && pnpm prettier",
     "lint:fix": "pnpm eslint:fix && pnpm biome:fix && pnpm prettier:fix",
+    "generate-types": "pnpm --recursive run generate-types",
     "prepare": "jiti .husky/install.mts"
   },
   "license": "ISC",

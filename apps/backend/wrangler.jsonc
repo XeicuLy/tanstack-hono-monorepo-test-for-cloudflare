@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "backend",
+  "name": "tanstack-hono-monorepo-test-api",
   "main": "src/index.ts",
   "compatibility_date": "2025-11-09",
   // "compatibility_flags": [

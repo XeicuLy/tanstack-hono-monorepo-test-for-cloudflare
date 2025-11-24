@@ -32,24 +32,68 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Deploy and get preview URL
-        id: deploy
+      - name: Deploy Backend Preview
+        id: deploy-backend
+        working-directory: apps/backend
         run: |
-          OUTPUT=$(pnpm wrangler versions upload 2>&1)
+          echo "🚀 Deploying backend..."
+          OUTPUT=$(pnpm wrangler versions upload 2>&1) || {
+            EXIT_CODE=$?
+            echo "❌ Backend deployment failed with exit code $EXIT_CODE"
+            echo "Output:"
+            echo "$OUTPUT"
+            exit $EXIT_CODE
+          }
           echo "$OUTPUT"
-          PREVIEW_URL=$(echo "$OUTPUT" | grep "Version Preview URL:" | sed 's/Version Preview URL: //')
-          if [ -z "$PREVIEW_URL" ]; then
-            echo "Version Preview URL not found in wrangler output" >&2
+
+          BACKEND_PREVIEW_URL=$(echo "$OUTPUT" | grep "Version Preview URL:" | sed 's/.*Version Preview URL: //' | tr -d '[:space:]')
+
+          if [ -z "$BACKEND_PREVIEW_URL" ]; then
+            echo "❌ Backend Version Preview URL not found in wrangler output"
+            echo "Full output was:"
+            echo "$OUTPUT"
             exit 1
           fi
-          echo "PREVIEW_URL=$PREVIEW_URL" >> $GITHUB_ENV
+
+          echo "✅ Backend deployed successfully"
+          echo "BACKEND_PREVIEW_URL=$BACKEND_PREVIEW_URL" >> $GITHUB_ENV
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-      - name: Show Preview URL
+      - name: Deploy Frontend Preview
+        id: deploy-frontend
+        working-directory: apps/frontend
         run: |
-          echo "Preview URL: ${{ env.PREVIEW_URL }}"
+          echo "🚀 Deploying frontend..."
+          OUTPUT=$(pnpm wrangler versions upload 2>&1) || {
+            EXIT_CODE=$?
+            echo "❌ Frontend deployment failed with exit code $EXIT_CODE"
+            echo "Output:"
+            echo "$OUTPUT"
+            exit $EXIT_CODE
+          }
+          echo "$OUTPUT"
+
+          FRONTEND_PREVIEW_URL=$(echo "$OUTPUT" | grep "Version Preview URL:" | sed 's/.*Version Preview URL: //' | tr -d '[:space:]')
+
+          if [ -z "$FRONTEND_PREVIEW_URL" ]; then
+            echo "❌ Frontend Version Preview URL not found in wrangler output"
+            echo "Full output was:"
+            echo "$OUTPUT"
+            exit 1
+          fi
+
+          echo "✅ Frontend deployed successfully"
+          echo "FRONTEND_PREVIEW_URL=$FRONTEND_PREVIEW_URL" >> $GITHUB_ENV
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Show Preview URLs
+        run: |
+          echo "Backend Preview URL: ${{ env.BACKEND_PREVIEW_URL }}"
+          echo "Frontend Preview URL: ${{ env.FRONTEND_PREVIEW_URL }}"
 
       - name: Delete previous bot comments
         if: github.event_name == 'pull_request'
@@ -63,7 +107,7 @@ jobs:
               issue_number: context.issue.number
             });
 
-            // GitHub Actionsボットのコメントを削除
+            // GitHub Actionsボットの既存プレビューコメントを削除
             for (const comment of comments) {
               const isGithubActionsBot = comment.user?.login === 'github-actions[bot]';
               const isPreviewComment = comment.body?.includes('🚀 プレビューデプロイが完了しました！');
@@ -82,8 +126,13 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const previewUrl = '${{ env.PREVIEW_URL }}';
-            const comment = `🚀 プレビューデプロイが完了しました！\n\nプレビューURL: ${previewUrl}`;
+            const backendUrl = '${{ env.BACKEND_PREVIEW_URL }}';
+            const frontendUrl = '${{ env.FRONTEND_PREVIEW_URL }}';
+            const comment = `🚀 プレビューデプロイが完了しました！
+            **Backend API:** ${backendUrl}
+            **Frontend:** ${frontendUrl}
+            ---
+            *Commit: ${{ github.event.pull_request.head.sha }}*`;
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,

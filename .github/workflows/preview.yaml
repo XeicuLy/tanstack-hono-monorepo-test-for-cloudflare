@@ -65,7 +65,9 @@ jobs:
 
             // GitHub Actionsボットのコメントを削除
             for (const comment of comments) {
-              if (comment.user.type === 'Bot') {
+              const isGithubActionsBot = comment.user?.login === 'github-actions[bot]';
+              const isPreviewComment = comment.body?.includes('🚀 プレビューデプロイが完了しました！');
+              if (isGithubActionsBot && isPreviewComment) {
                 await github.rest.issues.deleteComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,

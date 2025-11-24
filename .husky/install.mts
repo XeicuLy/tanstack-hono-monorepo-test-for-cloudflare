@@ -1,4 +1,4 @@
-import consola from 'consola';
+import { consola } from 'consola';
 
 if (process.env.NODE_ENV === 'production' || process.env.CI === 'true') {
   process.exit(0);
